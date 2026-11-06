@@ -1,0 +1,288 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>The Fermentation Virtual Interactive</title><style>
+:root{font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#e9f8ff;background:#071725}*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 85% 0,#1b4750,#071725 62%)}main{max-width:1030px;margin:auto;padding:20px}header{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center;border-bottom:1px solid #3b6677;padding:12px 0}.brand{color:#7de8db;font-weight:900;letter-spacing:2px}.sub{color:#b9d5df}.card{background:#102c3e;border:1px solid #416d7b;border-radius:18px;padding:24px;margin:18px 0;box-shadow:0 10px 35px #0002}.stage{display:none}.stage.active{display:block}h1{font-size:clamp(32px,5vw,52px);margin:20px 0 6px}h2{font-size:25px;margin:0 0 10px}h3{color:#f5d98e}p,li{line-height:1.6}button{font:inherit;cursor:pointer}.btn,.choice{border:1px solid #72dfd2;border-radius:11px;padding:12px 17px;background:#5cddd0;color:#09232e;font-weight:800}.btn:disabled{opacity:.38;cursor:not-allowed}.secondary,.choice{background:#1b4054;color:#f1ffff}.choice{display:block;text-align:left;width:100%;margin:8px 0}.choice:hover:not(:disabled){background:#27586a}.choice:disabled{cursor:default}.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.feedback{background:#234b50;padding:12px;border-radius:10px;margin:12px 0}.error{background:#653d43}.progress{height:12px;background:#234556;border-radius:10px;overflow:hidden;margin-top:14px}.progress>div{height:100%;width:0;background:#75dfae;transition:width .3s}.pill{border:1px solid #467e88;border-radius:30px;padding:7px 12px;color:#cce8ee}.checkpoint{border:1px dashed #d5bc7c;background:#203e4b;padding:17px;border-radius:12px;margin:17px 0}select,input,textarea{font:inherit;background:#082435;color:white;border:1px solid #7297a7;border-radius:8px;padding:11px;max-width:100%}textarea{width:100%;min-height:115px}.cell{width:min(100%,600px);display:block;margin:auto}.small{font-size:13px;color:#b8d3de}.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(245px,1fr));gap:14px}.panel{background:#193b4c;padding:15px;border-radius:12px}.missionNav{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0}.missionNav span{font-size:12px;padding:7px 10px;border-radius:7px;background:#214658}.missionNav .on{background:#6bded0;color:#072734;font-weight:800}.table{border-collapse:collapse;width:100%;font-size:14px}.table th,.table td{border:1px solid #4c7585;padding:10px;text-align:left}.table th{background:#21485a}.badge{background:#2b5760;padding:5px 9px;border-radius:6px}.reflection{margin:10px 0}@media(max-width:600px){.card{padding:16px}}
+
+.sim-board{background:#092638;border:1px solid #4b8590;border-radius:14px;padding:16px;margin:16px 0}
+.sim-cell{position:relative;min-height:200px;border:5px solid #6dd7c8;border-radius:50%;background:radial-gradient(ellipse,#b9edf0,#72c9d4);overflow:hidden;color:#103d48;margin:12px auto;max-width:570px}
+.sim-label{position:absolute;top:12px;left:20px;font-weight:800;font-size:13px}
+.glucose{position:absolute;left:9%;top:43%;background:#ffdf86;border:2px solid #bb842e;border-radius:40px;padding:12px;font-weight:900;animation:glide 3s ease-in-out infinite alternate}
+.arrowanim{position:absolute;left:39%;top:47%;font-size:30px;animation:pulse 1.3s infinite}
+.pyruvate{position:absolute;right:9%;top:37%;background:#ad8bfa;border-radius:10px;padding:10px;text-align:center;font-weight:800}
+@keyframes glide{to{transform:translateX(30px)}}@keyframes pulse{50%{opacity:.25;transform:translateX(8px)}}
+.molecules{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.molecule{background:#234c60;color:white;border:2px solid #80c6cf;border-radius:9px;padding:12px 16px;cursor:grab;user-select:none;font-weight:750}
+.molecule.selected{border-color:#ffe29a;background:#57603b}
+.dropzone{min-height:100px;border:2px dashed #87c9c3;border-radius:12px;padding:15px;background:#163e4a;margin:10px 0}
+.dropzone:focus{outline:3px solid #f5d98e}
+.sim-status{padding:10px;border-radius:8px;background:#1e4954;margin-top:10px}
+@media(prefers-reduced-motion:reduce){.glucose,.arrowanim{animation:none}}
+
+/* Calm November palette: parchment, burgundy, rust, sage. */
+:root{color:#382b25;background:#f7f2e9}
+body{background:#f7f2e9;color:#382b25}
+main{max-width:990px}
+header{border-bottom:2px solid #d8c8b4}
+.brand{color:#793c32}
+.brand::before{content:"🍁 ";font-size:18px}
+.sub,.small{color:#756557}
+.card{background:#fffdf8;border:1px solid #ded2c3;box-shadow:0 5px 18px #49311d0c}
+h1{color:#703c31}
+h2{color:#693d32}
+h3{color:#925d28}
+.btn{background:#8a4936;color:#fffaf3;border-color:#8a4936}
+.btn:hover:not(:disabled){background:#6e3428}
+.secondary,.choice{background:#f7efe4;color:#45352b;border:1px solid #d7c3ac}
+.choice:hover:not(:disabled){background:#eadac7}
+.choice:disabled{opacity:.75}
+.feedback,.sim-status{background:#edf1e8;color:#2e4938}
+.error{background:#fbe8e3;color:#8c2f25}
+.progress{background:#e6d8c7}
+.progress>div{background:#a36a32}
+.pill,.badge{background:#f1e5d5;color:#683e30;border:1px solid #d5c1a8}
+.missionNav span{background:#eee3d5;color:#5a4839}
+.missionNav .on{background:#8a4936;color:#fff}
+.checkpoint{background:#fbf4e9;border:1px solid #d7bb8f}
+.panel{background:#f9f3e9}
+.table th{background:#f1e4d2}
+.table th,.table td{border-color:#d6c6b3}
+select,input,textarea{background:#fffdf9;color:#352c24;border-color:#bda990}
+.sim-board{background:#f8f0e5;border:1px solid #dbc9b2}
+.sim-cell{border-color:#819a7b;background:radial-gradient(ellipse,#e4eee1,#b8d2bb)}
+.glucose{background:#eacb82;border-color:#aa8438}
+.pyruvate{background:#d8c2df;color:#43314e}
+.arrowanim{color:#805036}
+.molecule{background:#f2e4cf;color:#443328;border-color:#b28c5d}
+.molecule.selected{background:#e8d1a7;border-color:#7b4a32}
+.dropzone{background:#fffaf1;color:#483b2e;border-color:#a8845b}
+.sim-label{color:#3e5b45}
+@media print{body{background:white;color:black}.card{background:white}}
+
+/* Explicit six-carbon splitting animation: one 6C glucose -> two 3C pyruvates. */
+.split-demo{background:#e7eee3;border:2px solid #9eae93;border-radius:16px;padding:14px;margin:14px 0;color:#3c4031}
+.split-demo .title{text-align:center;font-size:13px;font-weight:800;letter-spacing:.06em;color:#425e43}
+.split-stage{height:160px;position:relative;overflow:hidden}
+.carbon-chain{position:absolute;top:24px;left:50%;display:flex;gap:3px;transform:translateX(-50%);animation:fadeglucose 8s infinite}
+.carbon{width:27px;height:27px;display:grid;place-items:center;border-radius:50%;background:#d8a24d;border:2px solid #8d5b2d;font-weight:800;font-size:12px;color:#342b1c}
+.split-line{position:absolute;top:18px;left:50%;height:43px;border-left:3px dashed #a43f36;animation:cutline 8s infinite}
+.cut-label{position:absolute;top:65px;left:50%;transform:translateX(-50%);font-size:12px;font-weight:800;color:#934338;animation:cutline 8s infinite}
+.pyruvate-pair{position:absolute;top:92px;left:50%;transform:translateX(-50%);display:flex;gap:30px;opacity:0;animation:appearpyruvate 8s infinite}
+.pyruvate-unit{display:flex;gap:3px;align-items:center;background:#d7c3df;border:2px solid #8b699a;padding:8px;border-radius:12px}
+.pyruvate-unit span{display:grid;place-items:center;width:23px;height:23px;border-radius:50%;background:#aa84b9;color:#fff;font-size:11px;font-weight:800}
+.split-caption{text-align:center;font-weight:750;font-size:13px;margin:0}
+@keyframes fadeglucose{0%,25%{opacity:1}36%,85%{opacity:0}90%,100%{opacity:1}}
+@keyframes cutline{0%,15%{opacity:0}22%,38%{opacity:1}43%,100%{opacity:0}}
+@keyframes appearpyruvate{0%,33%{opacity:0;gap:0}45%,85%{opacity:1;gap:30px}92%,100%{opacity:0}}
+@media(prefers-reduced-motion:reduce){.carbon-chain,.split-line,.cut-label,.pyruvate-pair{animation:none}.carbon-chain{opacity:0}.split-line,.cut-label{opacity:0}.pyruvate-pair{opacity:1}}
+
+/* Student answer report: screen preview and a fitted, single printed page. */
+#summaryPreview{margin-top:22px;background:white;color:#222;border:1px solid #d7c3ac;padding:18px;border-radius:10px}
+.report-sheet{font:11px/1.3 Arial,sans-serif;color:#222;background:white;overflow-wrap:anywhere}
+.report-sheet h1{font:bold 20px/1.2 Georgia,serif;color:#703c31;margin:0 0 5px}
+.report-sheet h2{font:bold 13px/1.3 Arial,sans-serif;color:#703c31;margin:10px 0 5px}
+.report-sheet h3{font:bold 11px/1.3 Arial,sans-serif;color:#703c31;margin:0 0 5px}
+.report-sheet p{font:inherit;line-height:1.3;margin:4px 0}
+.report-meta{padding-bottom:8px;border-bottom:2px solid #8a4936;margin-bottom:8px}
+.report-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px 14px}
+.report-mission{border-bottom:1px solid #ddd;padding-bottom:6px;break-inside:avoid}
+.report-answer{font-weight:bold;color:#254937;white-space:pre-wrap}
+.report-cer{white-space:pre-wrap;border-left:3px solid #bda990;padding-left:8px}
+#printReport{display:none}
+body.measuring-report #printReport{display:block;position:absolute;left:-10000px;top:0;width:190mm}
+#printReport .report-sheet{width:190mm;transform-origin:top left}
+@media(max-width:600px){#summaryPreview .report-grid{grid-template-columns:1fr}}
+@media print{
+ @page{size:letter portrait;margin:10mm}
+ body.printing-summary{background:white!important;margin:0!important;padding:0!important}
+ body.printing-summary>main{display:none!important}
+ body.printing-summary #printReport{display:block!important;width:190mm;margin:0;padding:0}
+ body.printing-summary .report-grid{grid-template-columns:1fr 1fr}
+ body.printing-summary .report-sheet h1{font-size:20px!important}
+}
+</style><style id="printPageSettings"></style></head><body><main><header><div class="brand">⚗ THE FERMENTATION VIRTUAL INTERACTIVE</div><div class="sub">High School Biology | ~40–50 minutes</div><div id="score" class="pill">0 / 8 missions</div></header><div class="progress"><div id="bar"></div></div><div class="missionNav" id="nav"></div><h1>The Fermentation Virtual Interactive</h1><p class="sub">Explore the cytosol, run glycolysis, compare fermentation pathways, interpret experimental evidence, and rescue ATP production.</p>
+<section id="s0" class="card stage active"><h2>🔬 Briefing: The oxygen emergency</h2><p>A simulated cell is experiencing limited oxygen availability. Its glycolysis pathway needs NAD⁺. You will investigate the cell, trace carbon molecules, and decide how fermentation keeps ATP production going.</p><div id="cell"></div><div class="feedback" id="cellmsg">Click the light-blue cytosol in the cell diagram to locate glycolysis and fermentation.</div><p><strong>Mission plan:</strong> 8 missions, two checkpoints per mission, plus a final CER reflection. Estimated time 35–45 minutes; no countdown penalty.</p><button class="btn" id="begin" type="button">Begin mission →</button></section>
+<div id="missions"></div>
+<section id="s9" class="card stage"><h2>🏆 Final research report</h2><p>You've completed the eight investigation missions. Finish with a short claim-evidence-reasoning explanation.</p><div class="checkpoint"><label for="cer"><strong>CER prompt:</strong> A yeast culture is placed in a sealed container with glucose but limited oxygen. Explain how the yeast can continue generating some ATP, which products accumulate, and why NAD⁺ matters. Use evidence from the investigation.</label><textarea id="cer" placeholder="Claim: ... Evidence: ... Reasoning: ..."></textarea><p class="small">Your written explanation is for teacher review; it is not automatically graded.</p></div><label>Student name: <input id="student" placeholder="Your name"></label><div class="row" style="margin-top:15px"><button class="btn" id="printSummary" type="button">Save summary as PDF</button><button class="btn secondary" id="restart">Start over</button></div><p class="small">Your summary includes all 16 checkpoint questions, your final selected answers, the two molecule labs, and your CER reflection. Click <strong>Save summary as PDF</strong> to download a one-page PDF, then open that PDF to print it. If you are using a file preview, download this HTML file and open it in Chrome or Edge first.</p><p id="pdfStatus" class="small" role="status" aria-live="polite"></p><a id="pdfDownload" hidden target="_blank" rel="noopener">Open / save your PDF</a><div id="summaryPreview" aria-label="Student answer summary"></div><div class="feedback">Science summary: glycolysis produces net 2 ATP per glucose. Alcoholic fermentation produces ethanol and CO₂; lactic acid fermentation produces lactate. Both regenerate NAD⁺ so glycolysis can continue. Fermentation reactions themselves make no additional ATP.</div></section>
+</main><div id="printReport" aria-hidden="true"><div id="reportSheet" class="report-sheet"></div></div><script>
+"use strict";
+const $=id=>document.getElementById(id);
+const missions=[
+{title:"Explore the Cell",time:"4 min",intro:"Identify the location of glycolysis and fermentation in a eukaryotic cell. Remember: mitochondria are important in aerobic respiration, but these fermentation pathways occur in the cytosol.",a:{q:"Where do glycolysis and fermentation take place?",opts:["Nucleus","Cytosol","Mitochondrial inner membrane"],correct:1,why:"Both occur in the cytosol, the fluid portion of the cytoplasm."},b:{q:"Which organelle is NOT required as the location for fermentation?",opts:["Mitochondrion","Cytosol","Cell membrane"],correct:0,why:"Fermentation does not take place in the mitochondrion."}},
+{title:"Break Down Glucose",time:"4 min",intro:"Glycolysis splits one 6-carbon glucose into two 3-carbon pyruvate molecules. It makes ATP and transfers electrons to NAD⁺.",a:{q:"What are the carbon-containing end products of glycolysis per glucose?",opts:["One 6-carbon ethanol","Two 3-carbon pyruvate molecules","Three 2-carbon lactate molecules"],correct:1,why:"One 6-carbon glucose yields two 3-carbon pyruvate molecules."},b:{q:"What is the NET ATP gain from glycolysis per glucose?",opts:["0 ATP","2 ATP","36 ATP"],correct:1,why:"Glycolysis invests 2 ATP and produces 4 ATP, yielding a net gain of 2."}},
+{title:"Follow the Electron Carrier",time:"4 min",intro:"During glycolysis, NAD⁺ accepts electrons and becomes NADH. When oxygen is limited, fermentation regenerates NAD⁺ by transferring electrons from NADH.",a:{q:"What happens to NAD⁺ during glycolysis?",opts:["It is reduced to NADH","It becomes ATP","It becomes carbon dioxide"],correct:0,why:"NAD⁺ gains electrons (and hydrogen) to form NADH."},b:{q:"Why is regeneration of NAD⁺ essential?",opts:["It lets glycolysis continue","It creates oxygen","It doubles the number of carbons in glucose"],correct:0,why:"Without sufficient NAD⁺, glycolysis cannot continue at its normal rate."}},
+{title:"Alcoholic Fermentation",time:"5 min",intro:"In yeast, pyruvate releases CO₂ and forms acetaldehyde. NADH then reduces acetaldehyde to ethanol, regenerating NAD⁺.",a:{q:"Which products result from alcoholic fermentation of pyruvate?",opts:["Lactate only","Ethanol and carbon dioxide","Oxygen and glucose"],correct:1,why:"Yeast produces ethanol and CO₂ in alcoholic fermentation."},b:{q:"Why does bread dough rise when yeast ferments sugars?",opts:["Ethanol forms solid crystals","CO₂ gas forms bubbles","NAD⁺ is a gas"],correct:1,why:"Carbon dioxide gas gets trapped in the dough."}},
+{title:"Lactic Acid Fermentation",time:"4 min",intro:"In many animal cells and some bacteria, NADH transfers electrons to pyruvate, producing lactate and regenerating NAD⁺. No CO₂ is released in this step.",a:{q:"What does pyruvate become during lactic acid fermentation?",opts:["Lactate","Ethanol and CO₂","Oxygen"],correct:0,why:"Pyruvate is reduced directly to lactate."},b:{q:"Which statement is accurate?",opts:["Lactic acid fermentation releases CO₂ directly","Lactic acid fermentation regenerates NAD⁺","Lactic acid fermentation directly generates 30 ATP"],correct:1,why:"Regenerating NAD⁺ is the key role of fermentation."}},
+{title:"Compare the Pathways",time:"5 min",intro:"Both pathways recycle NADH to NAD⁺, but their carbon-containing products differ.",a:{q:"Which pathway releases CO₂ when pyruvate is processed?",opts:["Alcoholic fermentation","Lactic acid fermentation","Both equally"],correct:0,why:"Alcoholic fermentation releases CO₂ when pyruvate becomes acetaldehyde."},b:{q:"What do alcoholic and lactic acid fermentation have in common?",opts:["Both produce ethanol","Both regenerate NAD⁺","Both require mitochondria"],correct:1,why:"Both oxidize NADH to replenish NAD⁺."}},
+{title:"Analyze the Yeast Data",time:"5 min",intro:"A fictional yeast experiment measured gas collected over 10 minutes at different glucose concentrations. All other conditions were kept constant. Data: 0% glucose → 0 mL CO₂; 2% → 8 mL; 4% → 15 mL; 6% → 18 mL.",table:true,a:{q:"What is the independent variable in this experiment?",opts:["CO₂ volume","Glucose concentration","Time elapsed on the clock"],correct:1,why:"Researchers intentionally changed glucose concentration."},b:{q:"How much more CO₂ was collected at 6% glucose than at 2% glucose?",opts:["8 mL","10 mL","18 mL"],correct:1,why:"18 − 8 = 10 mL more CO₂."}},
+{title:"Rescue the Cell",time:"5 min",intro:"Your simulated cell has limited oxygen and a supply of glucose. Choose a scientifically supported rescue plan.",a:{q:"Which action allows glycolysis to keep making ATP?",opts:["Regenerate NAD⁺ using fermentation","Stop all electron transfers","Send pyruvate into the nucleus"],correct:0,why:"Fermentation restores the NAD⁺ needed for glycolysis."},b:{q:"How much ADDITIONAL ATP is made directly by fermentation after glycolysis?",opts:["0 ATP","2 ATP","34 ATP"],correct:0,why:"Fermentation itself adds no ATP; glycolysis supplies the net 2 ATP per glucose."}}
+];
+let stage=0;const solved=Array.from({length:8},()=>[false,false]);let wrong=0;
+const responses=Array.from({length:8},()=>[null,null]);
+const labResponses={4:[],5:[]};
+const cell=`<svg class="cell" viewBox="0 0 560 350" role="img" aria-label="Interactive animal cell with nucleus, mitochondrion and cytosol"><ellipse id="cytosol" cx="280" cy="173" rx="255" ry="150" fill="#a9e6ec" stroke="#56cfc2" stroke-width="10" style="cursor:pointer"/><ellipse cx="190" cy="157" rx="67" ry="63" fill="#9e8ddd" stroke="#5b54a1" stroke-width="5" pointer-events="none"/><circle cx="190" cy="157" r="22" fill="#6158a4" pointer-events="none"/><ellipse cx="390" cy="203" rx="78" ry="35" fill="#ffca8b" stroke="#b97744" stroke-width="5" transform="rotate(-17 390 203)" pointer-events="none"/><path d="M334 209 Q365 175 389 202 T445 194" stroke="#b97744" stroke-width="4" fill="none" pointer-events="none"/><g fill="#103c47" font-family="Arial" font-weight="bold" text-anchor="middle" pointer-events="none"><text x="280" y="75" font-size="20">CYTOSOL</text><text x="280" y="98" font-size="13">Glycolysis + fermentation</text><text x="190" y="241" font-size="15">NUCLEUS</text><text x="390" y="270" font-size="15">MITOCHONDRION</text></g></svg>`;
+$('cell').innerHTML=cell;$('cytosol').addEventListener('click',()=>{$('cellmsg').textContent='✓ Correct: glycolysis and both fermentation pathways occur in the cytosol.'});
+function build(){const container=$('missions');missions.forEach((m,i)=>{let n=i+1;const sec=document.createElement('section');sec.id='s'+n;sec.className='card stage';sec.innerHTML=`<div class="row"><span class="badge">Mission ${n} of 8</span><span class="small">Suggested time: ${m.time}</span></div><h2>${m.title}</h2><p>${m.intro}</p>${m.table?'<table class="table"><thead><tr><th>Glucose concentration</th><th>CO₂ collected (10 min)</th></tr></thead><tbody><tr><td>0%</td><td>0 mL</td></tr><tr><td>2%</td><td>8 mL</td></tr><tr><td>4%</td><td>15 mL</td></tr><tr><td>6%</td><td>18 mL</td></tr></tbody></table>':''}<div class="grid2"><div class="panel" id="q${n}a"></div><div class="panel" id="q${n}b"></div></div><div class="checkpoint" id="note${n}">🔬 Research notebook: complete both challenges to continue. <span id="state${n}">0/2 correct</span></div><button class="btn" id="next${n}" disabled>${n===8?'Finish investigation →':'Next mission →'}</button>`;container.appendChild(sec);
+if(n===4||n===5){
+const sim=document.createElement('div');sim.className='sim-board';
+sim.innerHTML=`<h3>🧬 Interactive molecule lab</h3><p>Watch glucose split into pyruvate in the cytosol. Then drag each molecule into the correct reaction zone, or click a molecule and click the zone. Finish the simulation to unlock this mission.</p>
+<div class="split-demo" role="img" aria-label="Looping diagram: one glucose molecule with six carbon atoms is split into two pyruvate molecules with three carbon atoms each during glycolysis in the cytosol."><div class="title">CYTOSOL · GLYCOLYSIS</div><div class="split-stage"><div class="carbon-chain"><span class="carbon">C</span><span class="carbon">C</span><span class="carbon">C</span><span class="carbon">C</span><span class="carbon">C</span><span class="carbon">C</span></div><div class="split-line"></div><div class="cut-label">SPLIT!</div><div class="pyruvate-pair"><div class="pyruvate-unit"><span>C</span><span>C</span><span>C</span></div><div class="pyruvate-unit"><span>C</span><span>C</span><span>C</span></div></div></div><p class="split-caption">1 glucose (6 carbons) → 2 pyruvate (3 carbons each)</p></div>
+<p><strong>${n===4?'Alcoholic pathway':'Lactic acid pathway'}:</strong> ${n===4?'Choose the molecules needed (both reactants and products) for alcoholic fermentation.':'Choose the molecules needed (both reactants and products) for lactic acid fermentation.'}</p>
+<div class="molecules" id="mol${n}"></div>
+<div class="dropzone" id="zone${n}" tabindex="0" role="button" aria-label="Reaction zone; select molecule then activate here"><strong>Reaction zone</strong><div id="placed${n}"></div></div>
+<div class="sim-status" id="simmsg${n}" aria-live="polite">Place the correct molecules here.</div>
+<button class="btn secondary" id="simreset${n}" type="button">Reset molecules</button>`;
+sec.insertBefore(sim,sec.querySelector('.grid2'));
+}
+for(let k=0;k<2;k++){const q=k===0?m.a:m.b;const target=$('q'+n+(k===0?'a':'b'));const heading=document.createElement('h3');heading.textContent='Checkpoint '+(k+1);target.appendChild(heading);const prompt=document.createElement('p');prompt.textContent=q.q;target.appendChild(prompt);q.opts.forEach((label,j)=>{const b=document.createElement('button');b.className='choice';b.textContent=label;b.addEventListener('click',()=>{if(solved[i][k])return;responses[i][k]=j;let fb=target.querySelector('.feedback');if(!fb){fb=document.createElement('p');target.appendChild(fb)}if(j===q.correct){solved[i][k]=true;fb.className='feedback';fb.textContent='✓ '+q.why;target.querySelectorAll('.choice').forEach(x=>x.disabled=true);$('state'+n).textContent=solved[i].filter(Boolean).length+'/2 correct';if(solved[i].every(Boolean)){updateNext(n);updateProgress()}}else{wrong++;fb.className='feedback error';fb.textContent='Not quite. Re-read the mission evidence and try again.'}});target.appendChild(b)})} $('next'+n).addEventListener('click',()=>go(n+1))});}
+const simulationDone={4:false,5:false};
+function updateNext(n){$('next'+n).disabled=!(solved[n-1].every(Boolean)&&((n!==4&&n!==5)||simulationDone[n]))}
+function setupSim(n){
+const required=n===4?['Pyruvate','NADH','Ethanol','CO₂','NAD⁺']:['Pyruvate','NADH','Lactate','NAD⁺'];
+const all=['Pyruvate','NADH','Ethanol','CO₂','Lactate','NAD⁺','O₂','Glucose'];
+let placed=[],selected=null;
+const tray=$('mol'+n),zone=$('zone'+n),display=$('placed'+n),status=$('simmsg'+n);
+function render(){tray.innerHTML='';all.filter(m=>!placed.includes(m)).forEach(m=>{const b=document.createElement('button');b.type='button';b.className='molecule'+(selected===m?' selected':'');b.textContent=m;b.draggable=true;b.addEventListener('click',()=>{selected=m;render()});b.addEventListener('dragstart',e=>{selected=m;e.dataTransfer.setData('text/plain',m)});tray.appendChild(b)});display.textContent=placed.join(' + ')||'Drop here';}
+function add(m){if(!m||placed.includes(m))return;if(!required.includes(m)){status.textContent=m+' is not part of this fermentation reaction. Try again.';return}placed.push(m);labResponses[n]=placed.slice();selected=null;render();if(required.every(x=>placed.includes(x))){simulationDone[n]=true;status.textContent='✓ Reaction complete! '+(n===4?'Pyruvate releases CO₂, and NADH helps form ethanol while regenerating NAD⁺.':'Pyruvate is reduced to lactate as NADH is oxidized to NAD⁺.');updateNext(n)}else status.textContent='Correct molecule! '+placed.length+' of '+required.length+' placed.'}
+zone.addEventListener('click',()=>add(selected));
+zone.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();add(selected)}});
+zone.addEventListener('dragover',e=>e.preventDefault());
+zone.addEventListener('drop',e=>{e.preventDefault();add(e.dataTransfer.getData('text/plain')||selected)});
+$('simreset'+n).addEventListener('click',()=>{placed=[];labResponses[n]=[];selected=null;simulationDone[n]=false;status.textContent='Place the correct molecules here.';updateNext(n);render()});render()
+}
+function updateProgress(){const completed=solved.filter(pair=>pair.every(Boolean)).length;$('score').textContent=completed+' / 8 missions';$('bar').style.width=completed/8*100+'%'}
+function go(n){stage=n;if(n===9)renderSummary();document.querySelectorAll('.stage').forEach(el=>el.classList.remove('active'));$('s'+n).classList.add('active');$('nav').innerHTML='';for(let i=1;i<=8;i++){let sp=document.createElement('span');sp.textContent=i;sp.className=i===n?'on':'';$('nav').appendChild(sp)}window.scrollTo({top:0,behavior:'instant'})}
+build();setupSim(4);setupSim(5);$('begin').addEventListener('click',()=>go(1));$('restart').addEventListener('click',()=>location.reload());function addText(parent,tag,text,className){
+ const el=document.createElement(tag);el.textContent=text;if(className)el.className=className;parent.appendChild(el);return el;
+}
+function populateReport(root){
+ root.replaceChildren();root.classList.add('report-sheet');
+ addText(root,'h1','The Fermentation Virtual Interactive');
+ addText(root,'p','Student answer summary · 8 missions / 16 checkpoints');
+ addText(root,'p','Name: '+($('student').value.trim()||'Biology Student')+'   |   Date: '+new Date().toLocaleDateString(), 'report-meta');
+ const grid=document.createElement('div');grid.className='report-grid';root.appendChild(grid);
+ missions.forEach((m,i)=>{
+  const block=document.createElement('section');block.className='report-mission';grid.appendChild(block);
+  addText(block,'h3','Mission '+(i+1)+': '+m.title);
+  [m.a,m.b].forEach((q,k)=>{
+   addText(block,'p',(k+1)+'. '+q.q);
+   addText(block,'p','Your answer: '+(responses[i][k]===null?'Not answered':q.opts[responses[i][k]]),'report-answer');
+  });
+  if(i===3||i===4)addText(block,'p','Molecule lab: '+(labResponses[i+1].join(' + ')||'Not completed'));
+ });
+ addText(root,'h2','Final claim–evidence–reasoning reflection');
+ addText(root,'p','A yeast culture is placed in a sealed container with glucose but limited oxygen. Explain how the yeast can continue generating some ATP, which products accumulate, and why NAD⁺ matters. Use evidence from the investigation.');
+ addText(root,'p',$('cer').value.trim()||'No reflection entered.','report-cer');
+ addText(root,'p','Responses shown are final selections after any retries. Written reflection is for teacher review.');
+}
+function renderSummary(){populateReport($('summaryPreview'));}
+function prepareSummaryPrint(){
+ $('printPageSettings').textContent='@media print{@page{size:letter portrait;margin:10mm}}';
+ populateReport($('reportSheet'));
+ document.body.classList.add('measuring-report');
+ const sheet=$('reportSheet');sheet.style.transform='none';
+ const availableHeight=250*96/25.4;
+ const scale=Math.min(1,availableHeight/sheet.scrollHeight);
+ sheet.style.transform='scale('+scale+')';
+ $('printReport').style.height=Math.ceil(sheet.scrollHeight*scale)+'px';
+ $('printReport').style.overflow='hidden';
+ // Absolute positioning keeps the unscaled content from creating extra PDF pages.
+ sheet.style.position='absolute';
+ $('printReport').style.position='relative';
+ document.body.classList.remove('measuring-report');
+ document.body.classList.add('printing-summary');
+}
+// Export a real PDF locally; no popups, external libraries, or print permissions.
+let summaryPdfUrl=null;
+function makeSummaryPdf(){
+ const canvas=document.createElement('canvas');
+ const density=3, pageWidth=612, pageHeight=792, margin=28;
+ canvas.width=pageWidth*density;canvas.height=pageHeight*density;
+ const ctx=canvas.getContext('2d');
+ if(!ctx)throw new Error('Canvas is unavailable in this browser.');
+ const width=pageWidth-margin*2, column=(width-14)/2;
+ const commands=[];
+ function text(value,x,y,maxWidth,size=9.5,bold=false,color='#222222'){
+  ctx.font=(bold?'bold ':'')+size+'px Arial, sans-serif';
+  const lines=[];
+  String(value).replace(/⁺/g,'+').replace(/₂/g,'2').replace(/\r\n?/g,'\n').split('\n').forEach(paragraph=>{
+   let line='';
+   // Wrap at words, and split long words without losing any characters.
+   for(const token of paragraph.split(/(\s+)/)){
+    if(ctx.measureText(line+token).width<=maxWidth){line+=token;continue;}
+    if(line.trim()){lines.push(line.trimEnd());line='';}
+    for(const ch of token){
+     if(line&&ctx.measureText(line+ch).width>maxWidth){lines.push(line);line='';}
+     line+=ch;
+    }
+   }
+   lines.push(line.trimEnd());
+  });
+  lines.forEach((line,i)=>commands.push({text:line,x,y:y+i*size*1.27,size,bold,color}));
+  return y+lines.length*size*1.27;
+ }
+ let y=text('The Fermentation Virtual Interactive',0,0,width,17,true,'#703c31')+4;
+ y=text('Student answer summary | 8 missions / 16 checkpoints',0,y,width,10)+5;
+ y=text('Name: '+($('student').value.trim()||'Biology Student')+'    |    Date: '+new Date().toLocaleDateString(),0,y,width,10,true)+12;
+ for(let row=0;row<4;row++){
+  const bottoms=[];
+  for(let col=0;col<2;col++){
+   const i=row*2+col,m=missions[i],x=col*(column+14);
+   let bottom=text('Mission '+(i+1)+': '+m.title,x,y,column,10,true,'#703c31')+4;
+   [m.a,m.b].forEach((q,k)=>{
+    bottom=text((k+1)+'. '+q.q,x,bottom,column)+2;
+    bottom=text('Your answer: '+(responses[i][k]===null?'Not answered':q.opts[responses[i][k]]),x,bottom,column,9.5,true,'#254937')+5;
+   });
+   if(i===3||i===4)bottom=text('Molecule lab: '+(labResponses[i+1].join(' + ')||'Not completed'),x,bottom,column,9)+4;
+   bottoms.push(bottom);
+  }
+  y=Math.max(...bottoms)+8;
+ }
+ y=text('Final claim–evidence–reasoning reflection',0,y,width,11,true,'#703c31')+4;
+ y=text('A yeast culture is placed in a sealed container with glucose but limited oxygen. Explain how the yeast can continue generating some ATP, which products accumulate, and why NAD⁺ matters. Use evidence from the investigation.',0,y,width,9)+5;
+ y=text($('cer').value.trim()||'No reflection entered.',0,y,width,9.5)+9;
+ y=text('Responses shown are final selections after any retries. Written reflection is for teacher review.',0,y,width,8);
+ const fit=Math.min(1,(pageHeight-2*margin)/y);
+ ctx.scale(density,density);ctx.fillStyle='#ffffff';ctx.fillRect(0,0,pageWidth,pageHeight);
+ ctx.translate(margin,margin);ctx.scale(fit,fit);ctx.textBaseline='top';
+ commands.forEach(c=>{ctx.font=(c.bold?'bold ':'')+c.size+'px Arial, sans-serif';ctx.fillStyle=c.color;ctx.fillText(c.text,c.x,c.y);});
+ const jpeg=Uint8Array.from(atob(canvas.toDataURL('image/jpeg',0.96).split(',')[1]),c=>c.charCodeAt(0));
+ // Embed the high-resolution page image in a standards-compliant one-page PDF.
+ const encoder=new TextEncoder(),parts=[],offsets=[0];let length=0;
+ const append=value=>{const bytes=typeof value==='string'?encoder.encode(value):value;parts.push(bytes);length+=bytes.length;};
+ function object(n,body){offsets[n]=length;append(n+' 0 obj\n'+body+'\nendobj\n');}
+ append('%PDF-1.4\n');
+ object(1,'<< /Type /Catalog /Pages 2 0 R >>');
+ object(2,'<< /Type /Pages /Kids [3 0 R] /Count 1 >>');
+ object(3,'<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /XObject << /Im0 4 0 R >> >> /Contents 5 0 R >>');
+ offsets[4]=length;append('4 0 obj\n<< /Type /XObject /Subtype /Image /Width '+canvas.width+' /Height '+canvas.height+' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length '+jpeg.length+' >>\nstream\n');
+ append(jpeg);append('\nendstream\nendobj\n');
+ const content='q\n612 0 0 792 0 0 cm\n/Im0 Do\nQ\n';
+ object(5,'<< /Length '+encoder.encode(content).length+' >>\nstream\n'+content+'endstream');
+ const start=length;append('xref\n0 6\n0000000000 65535 f \n');
+ for(let n=1;n<=5;n++)append(String(offsets[n]).padStart(10,'0')+' 00000 n \n');
+ append('trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n'+start+'\n%%EOF\n');
+ return new Blob(parts,{type:'application/pdf'});
+}
+$('printSummary').addEventListener('click',()=>{
+ try{
+  renderSummary();
+  const pdf=makeSummaryPdf();
+  if(summaryPdfUrl)URL.revokeObjectURL(summaryPdfUrl);
+  summaryPdfUrl=URL.createObjectURL(pdf);
+  const link=$('pdfDownload');link.href=summaryPdfUrl;
+  const name=($('student').value.trim()||'Student').replace(/[^a-zA-Z0-9_-]+/g,'_').slice(0,60);
+  link.download='Fermentation_Summary_'+name+'.pdf';link.hidden=false;
+  link.click();
+  $('pdfStatus').textContent='Your PDF is ready. Open the downloaded PDF to print. If the download did not start, use the Open / save your PDF link below. In a file preview, open the downloaded HTML in Chrome or Edge first.';
+ }catch(error){
+  $('pdfStatus').textContent='This preview could not create a PDF. Download this HTML file and open it in Chrome or Edge, then try Save summary as PDF again. You can also use Ctrl+P (Windows) or Command+P (Mac) to print the summary.';
+ }
+});
+['student','cer'].forEach(id=>$(id).addEventListener('input',renderSummary));
+window.addEventListener('beforeprint',()=>{
+ prepareSummaryPrint();
+});
+window.addEventListener('afterprint',()=>{
+ document.body.classList.remove('printing-summary','measuring-report');
+ $('printPageSettings').textContent='';
+});
+
+</script></body></html>
